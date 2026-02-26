@@ -47,6 +47,11 @@ class Config:
         self.PING_IMG = getenv("PING_IMG", "https://files.catbox.moe/o5i5oz.jpg")
         self.START_IMG = getenv("START_IMG", "https://files.catbox.moe/ncv2zt.jpg")
 
+    VIKKY = [
+    "💞", "🦋", "🔍", "🧪", "🦋", "⚡️", "🔥", "🦋", "🎩", "🌈", "🍷", "🥂", "🦋", "🥃", "🥤", "🕊️",
+    "💞", "🐝", "🕊️", "🧪", "🕊️", "🔎", "🦋", "🎶", "🪄", "💌", "🌡️", "💞", "🧨"
+    ]
+
     def check(self):
         missing = [
             var
