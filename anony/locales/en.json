@@ -114,7 +114,7 @@
     "sudo_added": "Added {0} to the sudo users list.",
     "sudo_not": "{0} is not an sudo user.",
     "sudo_removed": "Removed {0} from the sudo users list.",
-    "sudo_fetching": "Fetching sudo users list...",
+    "sudo_fetching": "Fetching sudo users list...", to
     "sudo_owner": "<u><b>Owner:</b></u>\n- {0}\n\n",
     "sudo_users": "<u><b>Sudo users:</b></u>",
     "user_not_admin": "Oh sure, go ahead and manage the video chat... oh wait, you're not an admin.",
