@@ -2,7 +2,6 @@
 # Licensed under the MIT License.
 # This file is part of AnonXMusic
 
-
 import os
 import re
 import yt_dlp
@@ -15,6 +14,8 @@ from py_yt import Playlist, VideosSearch
 
 from anony import logger
 from anony.helpers import Track, utils
+from config import API_URL
+from Anony.helpers._httpx import HttpxClient
 
 
 class YouTube:
@@ -32,9 +33,10 @@ class YouTube:
 
     def get_cookies(self):
         if not self.checked:
-            for file in os.listdir(self.cookie_dir):
-                if file.endswith(".txt"):
-                    self.cookies.append(f"{self.cookie_dir}/{file}")
+            if os.path.exists(self.cookie_dir):
+                for file in os.listdir(self.cookie_dir):
+                    if file.endswith(".txt"):
+                        self.cookies.append(f"{self.cookie_dir}/{file}")
             self.checked = True
         if not self.cookies:
             if not self.warned:
@@ -100,7 +102,55 @@ class YouTube:
         return tracks
 
     async def download(self, video_id: str, video: bool = False) -> str | None:
-        url = self.base + video_id
+        """
+        API First Download
+        Fallback to yt-dlp if API fails
+        """
+
+        video_url = self.base + video_id
+
+        # =========================
+        # 🔥 API FIRST
+        # =========================
+        if API_URL:
+            client = HttpxClient()
+            try:
+                response = await client.make_request(
+                    f"{API_URL}/api/track?url={video_url}&video={str(video).lower()}"
+                )
+
+                if response:
+                    cdn_url = response.get("cdnurl")
+
+                    if cdn_url:
+                        # Direct file download
+                        if not cdn_url.startswith("https://t.me/"):
+                            result = await client.download_file(cdn_url)
+                            if result.success:
+                                await client.close()
+                                return str(result.file_path)
+
+                        # Telegram CDN
+                        try:
+                            from anony import app
+                            msg = await app.get_messages(cdn_url)
+                            if msg:
+                                path = await msg.download()
+                                await client.close()
+                                return path
+                        except Exception as e:
+                            logger.warning("Telegram CDN failed: %s", e)
+
+            except Exception as e:
+                logger.warning("API request failed: %s", e)
+            finally:
+                await client.close()
+
+        # =========================
+        # ❗ FALLBACK TO yt-dlp
+        # =========================
+        logger.warning("API failed. Falling back to yt-dlp.")
+
         ext = "mp4" if video else "webm"
         filename = f"downloads/{video_id}.{ext}"
 
@@ -108,6 +158,7 @@ class YouTube:
             return filename
 
         cookie = self.get_cookies()
+
         base_opts = {
             "outtmpl": "downloads/%(id)s.%(ext)s",
             "quiet": True,
@@ -134,12 +185,9 @@ class YouTube:
         def _download():
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 try:
-                    ydl.download([url])
-                except (yt_dlp.utils.DownloadError, yt_dlp.utils.ExtractorError):
-                    if cookie: self.cookies.remove(cookie)
-                    return None
+                    ydl.download([video_url])
                 except Exception as ex:
-                    logger.warning("Download failed: %s", ex)
+                    logger.warning("yt-dlp fallback failed: %s", ex)
                     return None
             return filename
 
