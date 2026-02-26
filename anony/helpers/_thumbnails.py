@@ -17,7 +17,7 @@ from anony.helpers import Track
 def load_fonts():
     try:
         return {
-            "title": ImageFont.truetype("anony/helpers/Raleway-Bold.ttf", 48),  # Increased
+            "title": ImageFont.truetype("anony/helpers/Raleway-Bold.ttf", 44),
             "artist": ImageFont.truetype("anony/helpers/Inter-Light.ttf", 28),
             "small": ImageFont.truetype("anony/helpers/Inter-Light.ttf", 22),
         }
@@ -61,7 +61,7 @@ class Thumbnail:
             dark_overlay = Image.new("RGBA", (width, height), (0, 0, 0, 160))
             bg = Image.alpha_composite(bg.convert("RGBA"), dark_overlay)
 
-            # ===== PANEL FRAME =====
+            # ===== PANEL FRAME (Same Old Framing) =====
             panel_x, panel_y = 305, 125
             panel_w = 975 - 305
             panel_h = 595 - 125
@@ -97,19 +97,19 @@ class Thumbnail:
 
             bg.paste(cover, (325, 155), cover)
 
-            # ===== TEXT (Improved Spacing) =====
-            title = (song.title or "Unknown Title")[:43]
+            # ===== TEXT =====
+            title = (song.title or "Unknown Title")[:45]
             artist = (song.channel_name or "Unknown Artist")[:40]
 
             draw.text(
-                (540, 165),
+                (520, 165),
                 title,
                 fill="white",
                 font=FONTS["title"],
             )
 
             draw.text(
-                (540, 220),
+                (520, 215),
                 artist,
                 fill=(210, 210, 210),
                 font=FONTS["artist"],
@@ -128,19 +128,29 @@ class Thumbnail:
             except:
                 pass
 
-            # ===== VOLUME BAR (Improved Alignment) =====
+            # ===== VOLUME BAR (Dynamic Centered) =====
             vol_y = 575
 
+            panel_left = 305
+            panel_right = 975
+
+            padding = 110
+
+            bar_start = panel_left + padding
+            bar_end = panel_right - padding
+
             draw.line(
-                [(500, vol_y),
-                 (950, vol_y)],
+                [(bar_start, vol_y),
+                 (bar_end, vol_y)],
                 fill=(120, 120, 120),
                 width=7,
             )
 
+            filled_width = int((bar_end - bar_start) * 0.6)
+
             draw.line(
-                [(500, vol_y),
-                 (780, vol_y)],
+                [(bar_start, vol_y),
+                 (bar_start + filled_width, vol_y)],
                 fill=(240, 240, 240),
                 width=7,
             )
