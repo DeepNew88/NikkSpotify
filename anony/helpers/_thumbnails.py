@@ -39,7 +39,6 @@ async def fetch_image(url: str) -> Image.Image:
             r.raise_for_status()
             img = Image.open(BytesIO(r.content)).convert("RGBA")
 
-            # FULL SCREEN COVER (NO BOX, NO BLACK PADDING)
             img = ImageOps.fit(
                 img,
                 (1280, 720),
@@ -62,9 +61,8 @@ class Thumbnail:
 
             width, height = 1280, 720
 
-            # ===== PREMIUM FULL BLUR BACKGROUND =====
+            # ===== BACKGROUND =====
             bg = thumb.copy()
-
             bg = bg.filter(ImageFilter.GaussianBlur(15))
             bg = ImageEnhance.Brightness(bg).enhance(1.0)
 
@@ -72,8 +70,8 @@ class Thumbnail:
             bg = Image.alpha_composite(bg, dark_overlay)
 
             # ===== PANEL FRAME =====
-            panel_margin_x = 220   # left-right spacing
-            panel_margin_y = 90    # top-bottom spacing
+            panel_margin_x = 220
+            panel_margin_y = 90
 
             panel_x = panel_margin_x
             panel_y = panel_margin_y
@@ -143,15 +141,6 @@ class Thumbnail:
                 )
             except:
                 pass
-
-            filled_width = int((bar_end - bar_start) * 0.6)
-
-            draw.line(
-                [(bar_start, vol_y),
-                 (bar_start + filled_width, vol_y)],
-                fill=(240, 240, 240),
-                width=7,
-            )
 
             bg.save(save_path, "PNG", quality=95)
             return save_path
