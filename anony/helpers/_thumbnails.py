@@ -64,6 +64,7 @@ class Thumbnail:
             # ===== BACKGROUND =====
             bg = thumb.copy()
             bg = bg.filter(ImageFilter.GaussianBlur(18))
+            bg = ImageEnhance.Brightness(bg).enhance(0.45)
 
             # ===== PANEL FRAME =====
             panel_margin_x = 260
@@ -86,7 +87,7 @@ class Thumbnail:
             panel_area = panel_area.filter(ImageFilter.GaussianBlur(10))
 
             # Darken panel region slightly
-            panel_area = ImageEnhance.Brightness(panel_area).enhance(0.7)
+            panel_area = ImageEnhance.Brightness(panel_area).enhance(0.5)
 
             # Rounded mask
             mask = Image.new("L", (panel_w, panel_h), 0)
