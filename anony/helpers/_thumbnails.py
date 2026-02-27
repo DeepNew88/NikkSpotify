@@ -66,7 +66,7 @@ class Thumbnail:
             bg = bg.filter(ImageFilter.GaussianBlur(15))
             bg = ImageEnhance.Brightness(bg).enhance(1.0)
 
-            dark_overlay = Image.new("RGBA", (width, height), (0, 0, 0, 30))
+            dark_overlay = Image.new("RGBA", (width, height), (0, 0, 0, 25))
             bg = Image.alpha_composite(bg, dark_overlay)
 
             # ===== PANEL FRAME =====
@@ -79,10 +79,23 @@ class Thumbnail:
             panel_w = width - (panel_margin_x * 2)
             panel_h = height - (panel_margin_y * 2)
 
-            # ===== GLASS PANEL =====
-            glass = Image.new("RGBA", (panel_w, panel_h), (35, 35, 35, 120))
-            mask = Image.new("L", (panel_w, panel_h), 0)
+            # ===== REAL FROSTED GLASS EFFECT =====
 
+            # 1️⃣ Crop background under panel
+            blur_area = bg.crop(
+                (panel_x, panel_y, panel_x + panel_w, panel_y + panel_h)
+            )
+
+            # 2️⃣ Light blur for glass effect
+            blur_area = blur_area.filter(ImageFilter.GaussianBlur(12))
+
+            # 3️⃣ Paste blurred area back
+            bg.paste(blur_area, (panel_x, panel_y))
+
+            # 4️⃣ Transparent glass layer
+            glass = Image.new("RGBA", (panel_w, panel_h), (25, 25, 25, 110))
+
+            mask = Image.new("L", (panel_w, panel_h), 0)
             ImageDraw.Draw(mask).rounded_rectangle(
                 (0, 0, panel_w, panel_h),
                 radius=35,
