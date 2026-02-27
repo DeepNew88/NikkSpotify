@@ -38,7 +38,19 @@ async def fetch_image(url: str) -> Image.Image:
             r = await client.get(url, timeout=6)
             r.raise_for_status()
             img = Image.open(BytesIO(r.content)).convert("RGBA")
-            return ImageOps.fit(img, (1280, 720), Image.Resampling.LANCZOS)
+
+            # KEEP FULL IMAGE (NO HARSH CROP)
+            img.thumbnail((1280, 720), Image.Resampling.LANCZOS)
+
+            background = Image.new("RGBA", (1280, 720), (0, 0, 0, 255))
+
+            x = (1280 - img.width) // 2
+            y = (720 - img.height) // 2
+
+            background.paste(img, (x, y))
+
+            return background
+
         except:
             return Image.new("RGBA", (1280, 720), (25, 18, 18, 255))
 
@@ -53,15 +65,16 @@ class Thumbnail:
 
             width, height = 1280, 720
 
-            # ===== PREMIUM DARK BLUR BACKGROUND =====
+            # ===== PREMIUM BLUR BACKGROUND (VISIBLE FULL IMAGE) =====
             bg = thumb.resize((width, height), Image.Resampling.LANCZOS)
-            bg = bg.filter(ImageFilter.GaussianBlur(55))
-            bg = ImageEnhance.Brightness(bg).enhance(0.45)
 
-            dark_overlay = Image.new("RGBA", (width, height), (0, 0, 0, 20))
+            bg = bg.filter(ImageFilter.GaussianBlur(35))
+            bg = ImageEnhance.Brightness(bg).enhance(0.8)
+
+            dark_overlay = Image.new("RGBA", (width, height), (0, 0, 0, 80))
             bg = Image.alpha_composite(bg.convert("RGBA"), dark_overlay)
 
-            # ===== PANEL FRAME (Same Old Framing) =====
+            # ===== PANEL FRAME =====
             panel_x, panel_y = 305, 125
             panel_w = 975 - 305
             panel_h = 595 - 125
@@ -74,11 +87,13 @@ class Thumbnail:
             # ===== GLASS PANEL =====
             glass = Image.new("RGBA", (panel_w, panel_h), (35, 35, 35, 200))
             mask = Image.new("L", (panel_w, panel_h), 0)
+
             ImageDraw.Draw(mask).rounded_rectangle(
                 (0, 0, panel_w, panel_h),
                 radius=30,
                 fill=255,
             )
+
             glass.putalpha(mask)
             bg.paste(glass, (panel_x, panel_y), glass)
 
@@ -93,8 +108,8 @@ class Thumbnail:
             ImageDraw.Draw(cover_mask).rounded_rectangle(
                 (0, 0, 184, 184), radius=20, fill=255
             )
-            cover.putalpha(cover_mask)
 
+            cover.putalpha(cover_mask)
             bg.paste(cover, (325, 155), cover)
 
             # ===== TEXT =====
@@ -128,12 +143,10 @@ class Thumbnail:
             except:
                 pass
 
-            # ===== VOLUME BAR (Dynamic Centered) =====
+            # ===== VOLUME BAR =====
             vol_y = 575
-
             panel_left = 305
             panel_right = 975
-
             padding = 110
 
             bar_start = panel_left + padding
