@@ -61,15 +61,9 @@ class Thumbnail:
 
             width, height = 1280, 720
 
-            # ===== BACKGROUND (LIGHT & CLEAR) =====
+            # ===== BACKGROUND (STRONG BLUR, NO DARK OVERLAY) =====
             bg = thumb.copy()
-
-            # Light blur only
-            bg = bg.filter(ImageFilter.GaussianBlur(8))
-
-            # Very light overlay
-            dark_overlay = Image.new("RGBA", (width, height), (0, 0, 0, 10))
-            bg = Image.alpha_composite(bg, dark_overlay)
+            bg = bg.filter(ImageFilter.GaussianBlur(35))
 
             # ===== PANEL FRAME =====
             panel_margin_x = 220
@@ -81,20 +75,15 @@ class Thumbnail:
             panel_w = width - (panel_margin_x * 2)
             panel_h = height - (panel_margin_y * 2)
 
-            # ===== REAL TRANSPARENT GLASS =====
-
-            # Crop background under panel
-            blur_area = bg.crop(
+            # ===== EXTRA BLUR INSIDE PANEL =====
+            panel_area = bg.crop(
                 (panel_x, panel_y, panel_x + panel_w, panel_y + panel_h)
             )
+            panel_area = panel_area.filter(ImageFilter.GaussianBlur(18))
+            bg.paste(panel_area, (panel_x, panel_y))
 
-            # Slight blur for frosted effect
-            blur_area = blur_area.filter(ImageFilter.GaussianBlur(6))
-
-            bg.paste(blur_area, (panel_x, panel_y))
-
-            # Light grey transparent glass (visible transparency)
-            glass = Image.new("RGBA", (panel_w, panel_h), (60, 60, 60, 30))
+            # ===== DEEP TRANSPARENT GLASS =====
+            glass = Image.new("RGBA", (panel_w, panel_h), (20, 20, 20, 95))
 
             mask = Image.new("L", (panel_w, panel_h), 0)
             ImageDraw.Draw(mask).rounded_rectangle(
