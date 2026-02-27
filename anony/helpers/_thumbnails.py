@@ -76,11 +76,6 @@ class Thumbnail:
             panel_w = 975 - 305
             panel_h = 595 - 125
 
-            # ===== SHADOW =====
-            shadow = Image.new("RGBA", (panel_w, panel_h), (0, 0, 0, 255))
-            shadow = shadow.filter(ImageFilter.GaussianBlur(45))
-            bg.paste(shadow, (panel_x + 18, panel_y + 28), shadow)
-
             # ===== GLASS PANEL =====
             glass = Image.new("RGBA", (panel_w, panel_h), (35, 35, 35, 190))
             mask = Image.new("L", (panel_w, panel_h), 0)
