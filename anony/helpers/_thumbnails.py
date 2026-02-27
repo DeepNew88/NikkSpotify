@@ -144,22 +144,6 @@ class Thumbnail:
             except:
                 pass
 
-            # ===== VOLUME BAR =====
-            vol_y = 575
-            panel_left = 305
-            panel_right = 975
-            padding = 110
-
-            bar_start = panel_left + padding
-            bar_end = panel_right - padding
-
-            draw.line(
-                [(bar_start, vol_y),
-                 (bar_end, vol_y)],
-                fill=(120, 120, 120),
-                width=7,
-            )
-
             filled_width = int((bar_end - bar_start) * 0.6)
 
             draw.line(
